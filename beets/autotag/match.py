@@ -138,7 +138,10 @@ def track_distance(item, track_info, incl_artist=False):
                        config['match']['track_length_max'].as_number())
 
     # Title.
-    dist.add_string('track_title', item.title, track_info.title)
+    if track_info.title_alt:
+        dist.add_string('track_title', item.title, track_info.title_alt + [track_info.title])
+    else:
+        dist.add_string('track_title', item.title, track_info.title)
 
     # Artist. Only check if there is actually an artist in the track data.
     if incl_artist and track_info.artist and \

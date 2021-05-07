@@ -155,7 +155,7 @@ class TrackInfo(AttrDict):
     may be None. The indices ``index``, ``medium``, and ``medium_index``
     are all 1-based.
     """
-    def __init__(self, title=None, track_id=None, release_track_id=None,
+    def __init__(self, title=None, title_alt=None, track_id=None, release_track_id=None,
                  artist=None, artist_id=None, length=None, index=None,
                  medium=None, medium_index=None, medium_total=None,
                  artist_sort=None, disctitle=None, artist_credit=None,
@@ -165,6 +165,7 @@ class TrackInfo(AttrDict):
                  work_disambig=None, bpm=None, initial_key=None, genre=None,
                  **kwargs):
         self.title = title
+        self.title_alt = title_alt
         self.track_id = track_id
         self.release_track_id = release_track_id
         self.artist = artist
@@ -203,6 +204,11 @@ class TrackInfo(AttrDict):
             value = getattr(self, fld)
             if isinstance(value, bytes):
                 setattr(self, fld, value.decode(codec, 'ignore'))
+        if self.title_alt:
+            for i, title in enumerate(self.title_alt):
+                if isinstance(title, bytes):
+                    self.title_alt[i] = title.decode(codec, 'ignore')
+                
 
     def copy(self):
         dupe = TrackInfo()
@@ -532,12 +538,14 @@ class Distance(object):
             dist = 0.0
         self.add(key, dist)
 
-    def add_string(self, key, str1, str2):
-        """Adds a distance penalty based on the edit distance between
-        `str1` and `str2`.
+    def add_string(self, key, str1, options):
+        """Adds a distance penalty based on the lower edit distance between
+        `str1` and strings in `options`.
         """
-        dist = string_dist(str1, str2)
-        self.add(key, dist)
+        if not isinstance(options, (list, tuple)):
+            options = [options]
+        dists = [string_dist(str1, str2) for str2 in options]
+        self.add(key, min(dists))
 
 
 # Structures that compose all the information for a candidate match.
