@@ -221,6 +221,7 @@ class TrackInfo(AttrDict):
     def __init__(
         self,
         title: Optional[str] = None,
+        title_alt: Optional[str] = None,
         track_id: Optional[str] = None,
         release_track_id: Optional[str] = None,
         artist: Optional[str] = None,
@@ -255,6 +256,7 @@ class TrackInfo(AttrDict):
         **kwargs,
     ):
         self.title = title
+        self.title_alt = title_alt
         self.track_id = track_id
         self.release_track_id = release_track_id
         self.artist = artist
@@ -305,6 +307,11 @@ class TrackInfo(AttrDict):
             value = getattr(self, fld)
             if isinstance(value, bytes):
                 setattr(self, fld, value.decode(codec, "ignore"))
+        if self.title_alt:
+            for i, title in enumerate(self.title_alt):
+                if isinstance(title, bytes):
+                    self.title_alt[i] = title.decode(codec, "ignore")
+                
 
     def copy(self) -> "TrackInfo":
         dupe = TrackInfo()
@@ -644,12 +651,14 @@ class Distance:
             dist = 0.0
         self.add(key, dist)
 
-    def add_string(self, key: str, str1: Optional[str], str2: Optional[str]):
-        """Adds a distance penalty based on the edit distance between
-        `str1` and `str2`.
+    def add_string(self, key: str, str1: Optional[str], strs: Optional[Union[List[str], Tuple[str], str]]):
+        """Adds a distance penalty based on the lower edit distance between
+        `str1` and strings in `strs`.
         """
-        dist = string_dist(str1, str2)
-        self.add(key, dist)
+        if not isinstance(strs, (list, tuple)):
+            strs = [strs]
+        dists = [string_dist(str1, str2) for str2 in strs]
+        self.add(key, min(dists))
 
 
 # Structures that compose all the information for a candidate match.

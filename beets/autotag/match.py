@@ -185,7 +185,10 @@ def track_distance(
         dist.add_ratio("track_length", diff, track_length_max)
 
     # Title.
-    dist.add_string("track_title", item.title, track_info.title)
+    if track_info.title_alt:
+        dist.add_string("track_title", item.title, track_info.title_alt + [track_info.title])
+    else:
+        dist.add_string("track_title", item.title, track_info.title)
 
     # Artist. Only check if there is actually an artist in the track data.
     if (
