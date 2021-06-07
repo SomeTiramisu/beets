@@ -60,6 +60,7 @@ SPECIAL_FIELDS = {
         'index',
         'medium_index',
         'title',
+        'title_alt',
         'artist_credit',
         'artist_sort',
         'artist',
